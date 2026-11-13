@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1460" height="520" viewBox="0 0 1460 520" font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+<rect width="1460" height="520" rx="18" fill="#0f1115"/>
+<text x="70" y="46" fill="#9aa3b2" font-size="14">Multi-turn safety audit of Aya Expanse 8B · Lexsi hackathon, Track 2, Problem #3</text>
+<text x="70" y="78" fill="#ffffff" font-size="28" font-weight="bold">Pipeline architecture</text>
+<path d="M130,116 L490,116 L516,178.0 L490,240 L130,240 A60 62 0 0 1 130,116 Z" fill="#2563eb"/>
+<text x="110" y="158" fill="#ffffff" font-size="22" font-weight="bold">Scenario suite</text>
+<text x="110" y="180" fill="#ffffff" fill-opacity="0.75" font-size="12">NB2 · §3</text>
+<rect x="110" y="194" width="102.4375" height="26" rx="13" fill="#0b0d12"/>
+<text x="120" y="212" fill="#ffffff" font-size="13">66 scenarios</text>
+<rect x="218.4375" y="194" width="128.109375" height="26" rx="13" fill="#0b0d12"/>
+<text x="228.4375" y="212" fill="#ffffff" font-size="13">5 attack families</text>
+<rect x="352.546875" y="194" width="112.96875" height="26" rx="13" fill="#0b0d12"/>
+<text x="362.546875" y="212" fill="#ffffff" font-size="13">dev / test split</text>
+<path d="M498,116 L918,116 L944,178.0 L918,240 L498,240 L524,178.0 Z" fill="#2563eb"/>
+<text x="546" y="158" fill="#ffffff" font-size="22" font-weight="bold">Multi-turn run</text>
+<text x="546" y="180" fill="#ffffff" fill-opacity="0.75" font-size="12">NB2 · §4–7</text>
+<rect x="546" y="194" width="124.234375" height="26" rx="13" fill="#0b0d12"/>
+<text x="556" y="212" fill="#ffffff" font-size="13">Aya Expanse 8B</text>
+<rect x="676.234375" y="194" width="103.40625" height="26" rx="13" fill="#0b0d12"/>
+<text x="686.234375" y="212" fill="#ffffff" font-size="13">4-bit, greedy</text>
+<rect x="785.640625" y="194" width="97.53125" height="26" rx="13" fill="#0b0d12"/>
+<text x="795.640625" y="212" fill="#ffffff" font-size="13">turn by turn</text>
+<path d="M926,116 L1346,116 L1372,178.0 L1346,240 L926,240 L952,178.0 Z" fill="#2563eb"/>
+<text x="974" y="158" fill="#ffffff" font-size="22" font-weight="bold">Scoring</text>
+<text x="974" y="180" fill="#ffffff" fill-opacity="0.75" font-size="12">NB2 · §7, §15</text>
+<rect x="974" y="194" width="95.578125" height="26" rx="13" fill="#0b0d12"/>
+<text x="984" y="212" fill="#ffffff" font-size="13">canary leak</text>
+<rect x="1075.578125" y="194" width="131.90625" height="26" rx="13" fill="#0b0d12"/>
+<text x="1085.578125" y="212" fill="#ffffff" font-size="13">Granite Guardian</text>
+<rect x="1213.484375" y="194" width="113.9375" height="26" rx="13" fill="#0b0d12"/>
+<text x="1223.484375" y="212" fill="#ffffff" font-size="13">payload-gated</text>
+<path d="M130,316 L490,316 L516,378.0 L490,440 L130,440 A60 62 0 0 1 130,316 Z" fill="#2563eb"/>
+<text x="110" y="358" fill="#ffffff" font-size="22" font-weight="bold">Audit report</text>
+<text x="110" y="380" fill="#ffffff" fill-opacity="0.75" font-size="12">NB2 · §9–16</text>
+<rect x="110" y="394" width="110.46875" height="26" rx="13" fill="#0b0d12"/>
+<text x="120" y="412" fill="#ffffff" font-size="13">ASR by family</text>
+<rect x="226.46875" y="394" width="104.265625" height="26" rx="13" fill="#0b0d12"/>
+<text x="236.46875" y="412" fill="#ffffff" font-size="13">turn of break</text>
+<rect x="336.734375" y="394" width="114.375" height="26" rx="13" fill="#0b0d12"/>
+<text x="346.734375" y="412" fill="#ffffff" font-size="13">single vs multi</text>
+<path d="M498,316 L918,316 L944,378.0 L918,440 L498,440 L524,378.0 Z" fill="#ea580c"/>
+<text x="546" y="358" fill="#ffffff" font-size="22" font-weight="bold">Repair (SafeTune)</text>
+<text x="546" y="380" fill="#ffffff" fill-opacity="0.75" font-size="12">NB3 · §10–12</text>
+<rect x="546" y="394" width="125.296875" height="26" rx="13" fill="#0b0d12"/>
+<text x="556" y="412" fill="#ffffff" font-size="13">refusal direction</text>
+<rect x="677.296875" y="394" width="127.390625" height="26" rx="13" fill="#0b0d12"/>
+<text x="687.296875" y="412" fill="#ffffff" font-size="13">α chosen on dev</text>
+<rect x="810.6875" y="394" width="119.578125" height="26" rx="13" fill="#0b0d12"/>
+<text x="820.6875" y="412" fill="#ffffff" font-size="13">random control</text>
+<path d="M926,316 L1286,316 A60 62 0 0 1 1286,440 L926,440 L952,378.0 Z" fill="#ea580c"/>
+<text x="974" y="358" fill="#ffffff" font-size="22" font-weight="bold">Held-out test</text>
+<text x="974" y="380" fill="#ffffff" fill-opacity="0.75" font-size="12">NB3 · §13–14</text>
+<rect x="974" y="394" width="105.21875" height="26" rx="13" fill="#0b0d12"/>
+<text x="984" y="412" fill="#ffffff" font-size="13">before / after</text>
+<rect x="1085.21875" y="394" width="79.78125" height="26" rx="13" fill="#0b0d12"/>
+<text x="1095.21875" y="412" fill="#ffffff" font-size="13">Wilson CI</text>
+<rect x="1171.0" y="394" width="121.828125" height="26" rx="13" fill="#0b0d12"/>
+<text x="1181.0" y="412" fill="#ffffff" font-size="13">exact McNemar</text>
+<path d="M1372,178.0 H1402 V278.0 H34 V378.0 H64" fill="none" stroke="#9aa3b2" stroke-width="5" stroke-linejoin="round"/>
+<path d="M54,369.0 L70,378.0 L54,387.0" fill="none" stroke="#9aa3b2" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="70" y="476" width="14" height="14" rx="3" fill="#2563eb"/>
+<text x="92" y="488" fill="#c9d1dc" font-size="13">Audit (AuditKIT judge)</text>
+<rect x="340" y="476" width="14" height="14" rx="3" fill="#ea580c"/>
+<text x="362" y="488" fill="#c9d1dc" font-size="13">Repair (SafeTune steering)</text>
+<text x="1390" y="488" fill="#c9d1dc" font-size="13" text-anchor="end">NB1: proves SafeTune ConversationGuard misses distributed intent → model-based judge</text>
+</svg>
