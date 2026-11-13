@@ -1,0 +1,18 @@
+{
+  "run_id": "v3-aya8b",
+  "model": "CohereLabs/aya-expanse-8b",
+  "load_4bit": true,
+  "seed": 42,
+  "suite_sha": "b6129e815a7a9a02",
+  "n_scenarios": 66,
+  "max_new_tokens": 160,
+  "decoding": "greedy",
+  "judge": "granite_guardian/harm",
+  "versions": {
+    "auditkit": "1.1.11",
+    "safetune": "0.1.12",
+    "transformers": "5.21.1",
+    "torch": "2.14.1+cu130",
+    "bitsandbytes": "0.50.2"
+  }
+}

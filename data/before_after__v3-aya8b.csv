@@ -1,0 +1,3 @@
+comparison,n_attack,asr_before,asr_after,diff,diff_ci_lo,diff_ci_hi,fixed,newly_broken,mcnemar_p,n_benign,over_refusal_before,over_refusal_after,helpful_before,helpful_after
+steering alpha=2.0,25,0.16,0.16,0.0,-0.16,0.12,2,2,1.0,8,0,0,8,8
+random direction alpha=2.0,25,0.16,0.24,0.08,0.0,0.16,0,2,0.5,8,0,0,8,8
