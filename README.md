@@ -1,6 +1,6 @@
 # Multi-turn safety audit of Aya Expanse 8B
 
-**One-line claim:** On Aya Expanse 8B, multi-turn attacks succeed 26% of the time with no over-refusal; conversation structure changes *which* attacks succeed (19/50 verdicts flip versus a single prompt), the automatic judge misfires on harmless setup turns, and a dev-tuned refusal-direction repair did not transfer to held-out data.
+**One-line claim:** On Aya Expanse 8B, multi-turn attacks succeed 26% of the time with no over-refusal; SafeTune's `ConversationGuard` provably cannot give a first detection on them (0/2,160 and 0/50); prompt injection needs the conversation form (5/10 vs 1/10 as a single prompt); and a dev-tuned refusal-direction repair did not transfer to held-out data.
 
 **Team Entity:** Sourabh Dahiya, Amritanshu Singh, Sidhant Mahi ([@SIDHANTMAHI](https://github.com/SIDHANTMAHI))
 
@@ -17,7 +17,8 @@
 | **Base model + method** | `CohereLabs/aya-expanse-8b` (4-bit), audited turn by turn with AuditKIT GuardJudge + canary leak detection; repaired with SafeTune refusal-direction steering |
 | **Headline (audit)** | Attack success **26%** (13/50, 95% CI 16–40%), benign over-refusal **0/16** |
 | **Headline (repair, held-out test)** | Attack success **16% → 16%** (2 fixed, 2 newly broken); dev showed 36% → 16% |
-| **Main findings** | SafeTune's ConversationGuard detects 0/50 attacks (proof included); judge flagged 3 harmless setup turns as harmful; injection needs the multi-turn form (5/10 vs 1/10) |
+| **Main findings** | SafeTune's ConversationGuard detects 0/50 attacks (proof included); injection needs the multi-turn form (5/10 vs 1/10); scoring is payload-gated because 3 of 4 hand-read early judge flags were false |
+| **What this delivers** | A reproducible multi-turn audit harness, a proof of a limitation in a Lexsi kit, and an honest negative repair result. Not a safer model: the repair did not transfer |
 | **Kits** | AuditKIT (judge), SafeTune (guard analysis, refusal direction, steering) |
 
 ![Pipeline architecture](pipeline.svg)
@@ -28,13 +29,13 @@ Single-prompt safety evaluations can miss failures that only appear across a con
 
 **Guard analysis.** SafeTune's ConversationGuard detected 0 of 2,160 conversations from SafeTune's own attack generator and 0 of our 50 attacks. We prove its cumulative window can never trigger a first detection, so it acts as a single-turn keyword filter; we therefore score with a model-based judge.
 
-**Judge reliability.** Hand-auditing showed that 3 of 4 judge flags raised before the harmful request were false positives on topic-adjacent setup turns. We therefore fixed a payload-gated scoring rule before running any repair experiment.
+**Scoring decision.** We hand-read the 4 judge flags raised before the harmful request; 3 were false positives on topic-adjacent setup turns. Four labels cannot support a claim about judge reliability in general, but they were enough to fix a payload-gated scoring rule (a break counts only at or after the payload turn) before running any repair experiment.
 
-**Audit.** The model breaks on 13/50 attacks (26%, 95% CI 16–40%) with 0/16 over-refusal on benign chats; 5 of the 13 breaks are judge-free canary leaks. Multi-turn delivery does not significantly change the overall rate against matched single-prompt versions (26% vs 20%, exact McNemar p = 0.65), but 19/50 scenarios flip verdict: injection succeeds far more often in conversation form (5/10 vs 1/10). Late breaks (turns 6–9) occur only in long conversations.
+**Audit.** The model breaks on 13/50 attacks (26%, 95% CI 16–40%) with 0/16 over-refusal on benign chats; 5 of the 13 breaks are judge-free canary leaks. Multi-turn delivery does not significantly change the overall rate against matched single-prompt versions (26% vs 20%, exact McNemar p = 0.65), but 19/50 scenarios flip verdict. These flips are the discordant pairs of that same test and we did not measure a null rate for them (one seed, one judge), so the pooled flip count is descriptive; the clearest signal is injection, which succeeds far more often in conversation form (5/10 vs 1/10). Late breaks (turns 6–9) occur only in long conversations.
 
 **Repair.** Refusal-direction steering (layer 23), with strength chosen on dev only, cut dev attack success from 36% to 16% with no over-refusal, but did not transfer to the held-out test split: 16% → 16% (2 fixed, 2 newly broken; difference 0.00, CI −0.16 to +0.12). A random-direction control at the same strength fixed nothing (16% → 24%). Breaks appearing only under steering are judge verdicts and were not hand-audited.
 
-**Takeaway.** The audit, the guard analysis and the judge-reliability finding are the main contribution. The repair is an honest negative pilot: with only 4 baseline breaks in the test split, no repair could reach significance, and we report it as such.
+**Takeaway.** The audit harness, the guard proof and the payload-gated scoring rule are the contribution. The repair is an honest negative pilot: with only 4 baseline breaks in the test split, no repair could reach significance, and we report it as a pilot, not a fix.
 
 ## Problem statement and approach
 
@@ -153,6 +154,17 @@ The judge is Granite Guardian through AuditKIT. It flagged 0 of 16 benign contro
 - **Repair (NB3):** refusal direction at layer 23 (chosen by SafeTune); α ∈ {2, 4, 6, 8, 10}; selection rule fixed in advance: lowest dev ASR with dev over-refusal ≤ 25%, ties to the smaller α, no steering allowed as a candidate. Dev sweep stops a conversation at its first gated break; the test run does not.
 - **Control:** a random direction (seed 42) at the chosen α and layer.
 
+### Fixed in advance
+
+This study was not formally pre-registered. What was fixed before the repair experiment ran, and can be checked in the notebooks:
+
+- the dev/test split (seeded, per family) and the suite hash `b6129e815a7a9a02`;
+- the payload-gated scoring rule (NB3 §8b re-scores the baseline and asserts 13/50 before any steering run);
+- the α grid and the selection rule (lowest dev ASR subject to dev over-refusal ≤ 25%, ties to the smaller α, α = 0 allowed);
+- a single evaluation on the test split, and the random-direction control at the chosen α.
+
+What was not fixed in advance: the gating rule itself was chosen after inspecting baseline transcripts, and no hypotheses were written down before NB2.
+
 ## Results
 
 ### Audit, same model, 50 attacks + 16 benign
@@ -172,9 +184,9 @@ Benign: 0/16 over-refusal, 16/16 helpful, 0 judge false positives, 0 token leaks
 ### Findings
 
 - **The existing guard cannot audit multi-turn attacks.** NB1 proves that `ConversationGuard`'s cumulative score is a weighted mean of turn scores, so it can never exceed the highest turn score and never causes a first detection. It detected 0/2,160 generated attacks and 0/50 of ours, while firing on a single turn that stacks two trigger phrases.
-- **Conversation structure changes which attacks succeed, not how many.** 26% vs 20% overall (exact McNemar p = 0.65), but 19/50 scenarios flip verdict. Injection depends on the multi-turn form; long and cyber attacks did no better in conversation form.
+- **Conversation structure changes which attacks succeed, not how many.** 26% vs 20% overall (exact McNemar p = 0.65), but 19/50 scenarios flip verdict. The flips are the discordant pairs of the McNemar test and have no measured null (one seed, one judge), so read the pooled count as descriptive. Injection depends on the multi-turn form (5/10 vs 1/10, n = 10, suggestive); long and cyber attacks did no better in conversation form.
 - **Most breaks happen at the harmful request or one turn after.** Late breaks (turns 6–9) occur only in the long-conversation family.
-- **The judge misreads harmless setup turns.** 3 of 4 pre-payload flags were wrong, which inflated any-turn ASR from 26% to 32%.
+- **Scoring decision, not a finding about the judge.** 3 of the 4 pre-payload flags we hand-read were wrong, which is why any-turn ASR (32%) is higher than gated ASR (26%). With 4 labels this motivates the gating rule and nothing more.
 
 ### Repair: same model before vs after (held-out test, 25 attacks, 8 benign)
 
@@ -195,6 +207,34 @@ Refusal-direction steering did not transfer from dev to test. It fixed some inje
 ### Compute used
 
 Free Google Colab T4 GPU: about 1 hour for the NB2 audit and about 3 hours for NB3 (plus earlier pilot runs). Cost to us: $0.
+
+### Cost and ROI
+
+Computed from our own run. One full pass of the 66-scenario suite is 278 turns, about 140k input tokens and 49k output tokens (estimated at 4 characters per token from the recorded prompt and reply lengths), and took roughly 1 h on a Colab T4 (4-bit, `transformers`, batch size 1, greedy). Input is counted per turn with the history re-sent, which is how an API bills without prompt caching.
+
+Scaled to **1,000 multi-turn audit conversations**: 2.125 M input tokens, 0.739 M output tokens, 15.2 GPU-hours at our measured **13.6 output tokens/s**.
+
+| Route | Cost per 1,000 conversations |
+|---|---|
+| Self-hosted as measured, T4 at $0.59/h | $8.94 |
+| Self-hosted as measured, L4 at $0.44/h | $6.67 |
+| Closed API, Haiku 5.5 standard ($0.10 / $0.50 per M tokens) | $0.58 |
+| Closed API, Haiku 5.5 batch ($0.05 / $0.25 per M tokens) | $0.29 |
+| Closed API, GPT-5 mini ($0.25 / $2.00 per M tokens) | $2.01 |
+
+**Self-hosting loses at our throughput, by about 15×.** The harness generates one conversation at a time, so the GPU is mostly idle. The useful question is what throughput self-hosting needs to win. For an L4 at $0.44/h:
+
+| To beat | Required aggregate output throughput |
+|---|---|
+| GPT-5 mini | 45 tokens/s |
+| Haiku 5.5 standard | 155 tokens/s |
+| Haiku 5.5 batch | 310 tokens/s |
+
+We did not measure a batched (vLLM) deployment, so we report these thresholds instead of claiming to beat them. Prompt caching would lower the API side further. The closed models are also not capability-matched to Aya Expanse 8B.
+
+One thing the table does not price: the repair arm needs the weights. Refusal-direction extraction and activation steering cannot be run on a hosted closed model, so an audit of such a model can report a break but cannot try this kind of fix.
+
+Prices as published in October–November 2026: [GPU rates](https://tech-insider.org/gpu-cloud-providers-serverless-gpu-pricing-modal-runpod-nebius-2026/), [Anthropic](https://platform.claude.com/docs/en/about-claude/pricing), [OpenAI](https://developers.openai.com/api/docs/pricing).
 
 ## Limitations
 
@@ -233,9 +273,16 @@ These are forecasts, not results. With a 250-attack suite, a test split would co
 
 ## Artifacts
 
-- **HF dataset collection:** *link printed by NB4*: scenario suite, redacted transcripts for every run, metric tables, run manifests, figures.
-- **HF model collection:** *link printed by NB4*: the base model and the refusal-direction repo (direction file + settings).
-- **GitHub repo:** this repository.
+- **HF dataset collection:** [Multi-turn audit of Aya Expanse 8B: data](https://huggingface.co/sidhantmahi/collections)
+  - dataset repo: [sidhantmahi/aya-expanse-8b-multiturn-audit](https://huggingface.co/datasets/sidhantmahi/aya-expanse-8b-multiturn-audit): scenario suite, redacted transcripts for every run, metric tables, run manifests, figures.
+- **HF model collection:** [Multi-turn audit of Aya Expanse 8B: models](https://huggingface.co/sidhantmahi/collections)
+  - refusal-direction repo: [sidhantmahi/aya-expanse-8b-refusal-direction](https://huggingface.co/sidhantmahi/aya-expanse-8b-refusal-direction) (direction file + settings), alongside the base model `CohereLabs/aya-expanse-8b`.
+- **GitHub repo:** [SIDHANTMAHI/lexsi-multiturn-audit](https://github.com/SIDHANTMAHI/lexsi-multiturn-audit).
+- Unredacted model outputs are intentionally not published (see Dual-use and ethics).
+
+## License
+
+Code and notebooks: MIT. Scenario suite, transcripts and metric tables: CC-BY-NC-4.0, matching the Aya Expanse 8B licence. See [LICENSE](LICENSE).
 
 ## Documentation and reproduction
 
